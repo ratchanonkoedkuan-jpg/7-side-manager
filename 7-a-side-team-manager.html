@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>7-A-Side Team Manager</title>
+<style>
+:root{--bg:#07111b;--panel:#0d1b28;--panel2:#102333;--line:#1d3548;--text:#eef7ff;--muted:#8da5b8;--accent:#35e58a;--danger:#ff5c67}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% 0,#102538 0,#07111b 42%,#050b11 100%);color:var(--text);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input,select{font:inherit}button{cursor:pointer}
+.app{min-height:100vh;display:grid;grid-template-columns:220px 1fr}
+aside{border-right:1px solid var(--line);background:#08141f;padding:22px 14px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px;margin-bottom:30px}.ball{width:34px;height:34px;border-radius:10px;background:var(--accent);color:#06120c;display:grid;place-items:center;font-weight:900}
+.nav button{width:100%;border:0;background:transparent;color:var(--muted);padding:13px 14px;text-align:left;border-radius:10px;margin:3px 0}.nav button.active,.nav button:hover{background:#112536;color:#fff}
+main{padding:20px;max-width:1500px;width:100%;margin:auto}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}.top h1{margin:0;font-size:25px}.sub{color:var(--muted);font-size:13px}.actions{display:flex;gap:8px}.btn{border:1px solid var(--line);background:#102333;color:#fff;border-radius:9px;padding:10px 14px}.btn.primary{background:var(--accent);color:#06120c;border-color:var(--accent);font-weight:800}
+.grid{display:grid;grid-template-columns:minmax(480px,1.5fr) minmax(300px,.8fr);gap:16px}.panel{background:linear-gradient(180deg,#0d1b28,#0a1722);border:1px solid var(--line);border-radius:15px;overflow:hidden}.panelhead{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.panelhead h2{font-size:15px;margin:0}.field{display:flex;flex-direction:column;gap:6px}.field label{font-size:12px;color:var(--muted)}input,select{width:100%;background:#08141f;border:1px solid var(--line);border-radius:8px;color:#fff;padding:10px;outline:none}input:focus,select:focus{border-color:var(--accent)}
+.pitch{position:relative;margin:16px;aspect-ratio:1.45/1;border-radius:12px;overflow:hidden;background:linear-gradient(90deg,rgba(255,255,255,.025) 50%,transparent 50%),repeating-linear-gradient(90deg,#164a2b 0,#164a2b 10%,#195331 10%,#195331 20%);border:2px solid rgba(255,255,255,.22)}
+.pitch:before{content:"";position:absolute;inset:5%;border:2px solid rgba(255,255,255,.6);border-radius:3px}.pitch:after{content:"";position:absolute;left:5%;right:5%;top:50%;border-top:2px solid rgba(255,255,255,.6);box-shadow:0 0 0 999px transparent}
+.center{position:absolute;left:50%;top:50%;width:18%;aspect-ratio:1;border:2px solid rgba(255,255,255,.6);border-radius:50%;transform:translate(-50%,-50%)}
+.player{position:absolute;transform:translate(-50%,-50%);width:92px;text-align:center;user-select:none;cursor:grab;z-index:5}.player:active{cursor:grabbing}.avatar{width:55px;height:55px;margin:auto;border-radius:50%;border:2px solid var(--accent);background:#13293a;object-fit:cover}.pcard{margin-top:-2px;background:rgba(4,13,20,.92);border:1px solid #27455a;border-radius:7px;padding:4px 5px}.pcard b{display:block;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pcard small{color:var(--accent);font-weight:800}.remove{position:absolute;right:2px;top:-3px;width:18px;height:18px;border-radius:50%;border:0;background:var(--danger);color:#fff;font-size:11px;display:none}.player:hover .remove{display:block}
+.side{display:flex;flex-direction:column;gap:16px}.form{padding:16px;display:grid;gap:11px}.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}.photo{height:100px;border:1px dashed #345269;border-radius:10px;display:grid;place-items:center;color:var(--muted);overflow:hidden}.photo img{width:100%;height:100%;object-fit:cover}
+.roster{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;padding:12px}.mini{background:#0a1722;border:1px solid var(--line);border-radius:9px;padding:9px;display:flex;align-items:center;gap:8px;cursor:pointer}.mini img{width:40px;height:40px;border-radius:50%;object-fit:cover}.mini b{font-size:12px}.mini small{color:var(--muted);display:block}
+.bottom{margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:16px}.bench{padding:12px;display:flex;gap:9px;flex-wrap:wrap}.bench .mini{min-width:150px}.stats{padding:14px}.stat{display:grid;grid-template-columns:85px 1fr 35px;gap:8px;align-items:center;margin:10px 0;font-size:12px}.bar{height:7px;border-radius:10px;background:#172c3c;overflow:hidden}.bar i{display:block;height:100%;background:var(--accent)}
+.empty{text-align:center;color:var(--muted);padding:30px}
+.toast{position:fixed;right:18px;bottom:18px;background:#102333;border:1px solid var(--line);padding:12px 15px;border-radius:10px;display:none}
+@media(max-width:900px){.app{grid-template-columns:1fr}aside{display:none}.grid,.bottom{grid-template-columns:1fr}main{padding:12px}.pitch{margin:8px}.player{width:75px}.avatar{width:45px;height:45px}.pcard b{font-size:9px}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside><div class="brand"><div class="ball">7</div> 7-A-SIDE MANAGER</div>
+<div class="nav"><button class="active">⚽ จัดทีม</button><button onclick="scrollToSection('tactics')">♟ แท็กติก</button><button onclick="scrollToSection('roster')">👥 นักเตะ</button><button onclick="saveTeam()">💾 บันทึกทีม</button></div></aside>
+<main>
+<div class="top"><div><h1>Team Management</h1><div class="sub">ระบบจัดตัวฟุตบอล 7 คนสำหรับโค้ช</div></div><div class="actions"><button class="btn" onclick="resetTeam()">รีเซ็ต</button><button class="btn primary" onclick="saveTeam()">บันทึก Team Sheet</button></div></div>
+<div class="grid">
+<section class="panel"><div class="panelhead"><h2>สนามแข่งขัน · 7 คน</h2><select id="formation" onchange="changeFormation()"><option>2-3-1</option><option>3-2-1</option><option>2-2-2</option><option>3-1-2</option></select></div><div class="pitch" id="pitch"><div class="center"></div></div></section>
+<div class="side">
+<section class="panel" id="editor"><div class="panelhead"><h2>เพิ่ม / แก้ไขนักเตะ</h2></div><form class="form" onsubmit="addPlayer(event)">
+<div class="photo" id="photoBox">เลือกรูปนักเตะ <input id="photo" type="file" accept="image/*" style="display:none" onchange="preview(event)"></div>
+<button type="button" class="btn" onclick="document.getElementById('photo').click()">📷 เพิ่มรูป</button>
+<div class="two"><div class="field"><label>ชื่อ / ชื่อเล่น</label><input id="name" required placeholder="เช่น Pong"></div><div class="field"><label>เบอร์เสื้อ</label><input id="number" type="number" min="1" max="99" value="7"></div></div>
+<div class="two"><div class="field"><label>ตำแหน่ง</label><select id="pos"><option>GK</option><option>CB</option><option>LB</option><option>RB</option><option>CM</option><option>CAM</option><option>LW</option><option>RW</option><option>ST</option></select></div><div class="field"><label>Overall</label><input id="ovr" type="number" min="1" max="99" value="75"></div></div>
+<div class="two"><div class="field"><label>เท้าที่ถนัด</label><select id="foot"><option>Right</option><option>Left</option></select></div><div class="field"><label>บทบาท</label><select id="role"><option>Defender</option><option>Playmaker</option><option>Box-to-Box</option><option>Winger</option><option>Target Man</option><option>Goalkeeper</option></select></div></div>
+<button class="btn primary" type="submit">＋ เพิ่มนักเตะเข้าทีม</button></form></section>
+<section class="panel" id="roster"><div class="panelhead"><h2>นักเตะในทีม</h2><span id="count" class="sub">0 คน</span></div><div class="roster" id="rosterList"></div></section>
+</div></div>
+<div class="bottom">
+<section class="panel"><div class="panelhead"><h2>ตัวสำรอง</h2><span class="sub">เลือกนักเตะเพื่อเปลี่ยนตัว</span></div><div class="bench" id="bench"></div></section>
+<section class="panel" id="tactics"><div class="panelhead"><h2>ค่าสเตตัสทีม</h2><span class="sub">ภาพรวมผู้เล่นที่เลือก</span></div><div class="stats" id="stats"></div></section>
+</div>
+</main></div><div class="toast" id="toast"></div>
+<script>
+const defaultPlayers=[
+{id:1,name:"Noppon",number:1,pos:"GK",ovr:78,foot:"Right",role:"Goalkeeper",img:""},
+{id:2,name:"Kawin",number:2,pos:"RB",ovr:76,foot:"Right",role:"Defender",img:""},
+{id:3,name:"Sittichai",number:3,pos:"LB",ovr:75,foot:"Left",role:"Defender",img:""},
+{id:4,name:"Jirawat",number:4,pos:"CB",ovr:77,foot:"Right",role:"Defender",img:""},
+{id:5,name:"Phudit",number:5,pos:"CB",ovr:76,foot:"Right",role:"Defender",img:""},
+{id:6,name:"Saran",number:6,pos:"CM",ovr:74,foot:"Right",role:"Box-to-Box",img:""},
+{id:7,name:"Thanakorn",number:7,pos:"RW",ovr:74,foot:"Right",role:"Winger",img:""},
+{id:8,name:"Teerapat",number:8,pos:"CM",ovr:73,foot:"Left",role:"Playmaker",img:""},
+{id:9,name:"Pong",number:9,pos:"ST",ovr:83,foot:"Right",role:"Target Man",img:""},
+{id:10,name:"Kritsada",number:10,pos:"CAM",ovr:78,foot:"Right",role:"Playmaker",img:""},
+{id:11,name:"Nattapong",number:11,pos:"LW",ovr:76,foot:"Left",role:"Winger",img:""}
+];
+let players=JSON.parse(localStorage.getItem("sevenSidePlayers")||"null")||defaultPlayers;
+let photoData="";
+let formation="2-3-1";
+let selected=null;
+const positions={
+"2-3-1":[["GK",50,88],["CB",35,68],["CB",65,68],["CM",22,49],["CM",50,51],["CM",78,49],["ST",50,20]],
+"3-2-1":[["GK",50,88],["CB",25,66],["CB",50,69],["CB",75,66],["CM",35,48],["CM",65,48],["ST",50,20]],
+"2-2-2":[["GK",50,88],["CB",34,68],["CB",66,68],["CM",34,48],["CM",66,48],["ST",34,22],["ST",66,22]],
+"3-1-2":[["GK",50,88],["CB",25,68],["CB",50,70],["CB",75,68],["CM",50,47],["ST",34,22],["ST",66,22]]
+};
+function avatar(p){return p.img||"data:image/svg+xml;charset=utf-8,"+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="#163047"/><circle cx="50" cy="40" r="22" fill="#b7c6d1"/><path d="M18 98c3-27 61-27 64 0" fill="#29475d"/></svg>`)}
+function render(){renderPitch();renderRoster();renderBench();renderStats();document.getElementById("count").textContent=players.length+" คน"}
+function renderPitch(){
+const pitch=document.getElementById("pitch"); pitch.querySelectorAll(".player").forEach(x=>x.remove());
+const spots=positions[formation]; const starters=players.slice(0,7);
+spots.forEach((s,i)=>{const p=starters[i];if(!p)return;const el=document.createElement("div");el.className="player";el.style.left=s[1]+"%";el.style.top=s[2]+"%";el.draggable=true;el.innerHTML=`<button class="remove" onclick="removePlayer(${p.id})">×</button><img class="avatar" src="${avatar(p)}"><div class="pcard"><b>${p.number} · ${p.name}</b><small>${p.pos} · ${p.ovr}</small></div>`;el.ondragstart=e=>e.dataTransfer.setData("id",p.id);el.onclick=()=>selectPlayer(p.id);pitch.appendChild(el)})
+pitch.ondragover=e=>e.preventDefault();pitch.ondrop=e=>{const id=+e.dataTransfer.getData("id");const p=players.find(x=>x.id===id);if(!p)return;const rect=pitch.getBoundingClientRect();const x=((e.clientX-rect.left)/rect.width)*100,y=((e.clientY-rect.top)/rect.height)*100;p.x=x;p.y=y;renderCustomPositions();saveLocal()}
+}
+function renderCustomPositions(){document.querySelectorAll(".pitch .player").forEach((el,i)=>{const p=players.slice(0,7)[i];if(p.x!=null){el.style.left=p.x+"%";el.style.top=p.y+"%"}})}
+function renderRoster(){const box=document.getElementById("rosterList");box.innerHTML="";players.forEach(p=>{const el=document.createElement("div");el.className="mini";el.innerHTML=`<img src="${avatar(p)}"><div><b>${p.number} · ${p.name}</b><small>${p.pos} · OVR ${p.ovr}</small></div>`;el.onclick=()=>selectPlayer(p.id);box.appendChild(el)})}
+function renderBench(){const box=document.getElementById("bench");box.innerHTML="";players.slice(7).forEach(p=>{const el=document.createElement("div");el.className="mini";el.innerHTML=`<img src="${avatar(p)}"><div><b>${p.number} · ${p.name}</b><small>${p.pos} · OVR ${p.ovr}</small></div>`;el.onclick=()=>selectPlayer(p.id);box.appendChild(el)});if(!players.slice(7).length)box.innerHTML='<div class="empty">เพิ่มนักเตะมากกว่า 7 คนเพื่อสร้างตัวสำรอง</div>'}
+function renderStats(){let s=document.getElementById("stats");if(!players.length){s.innerHTML="";return}let avg=Math.round(players.reduce((a,p)=>a+p.ovr,0)/players.length);s.innerHTML=`<div class="stat"><span>Overall</span><div class="bar"><i style="width:${avg}%"></i></div><b>${avg}</b></div><div class="stat"><span>จำนวน</span><div class="bar"><i style="width:${Math.min(players.length,14)/14*100}%"></i></div><b>${players.length}</b></div><div class="stat"><span>ตัวจริง</span><div class="bar"><i style="width:${Math.min(players.length,7)/7*100}%"></i></div><b>${Math.min(players.length,7)}/7</b></div>`}
+function addPlayer(e){e.preventDefault();players.push({id:Date.now(),name:name.value,number:+number.value,pos:pos.value,ovr:+ovr.value,foot:foot.value,role:role.value,img:photoData});photoData="";document.getElementById("photoBox").innerHTML="เลือกรูปนักเตะ <input id=\"photo\" type=\"file\" accept=\"image/*\" style=\"display:none\" onchange=\"preview(event)\">";saveLocal();e.target.reset();ovr.value=75;number.value=7;showToast("เพิ่มนักเตะแล้ว");render()}
+function preview(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{photoData=r.result;document.getElementById("photoBox").innerHTML=`<img src="${photoData}">`};r.readAsDataURL(f)}
+function removePlayer(id){players=players.filter(p=>p.id!==id);saveLocal();render();showToast("ลบนักเตะแล้ว")}
+function selectPlayer(id){selected=players.find(p=>p.id===id);if(!selected)return;name.value=selected.name;number.value=selected.number;pos.value=selected.pos;ovr.value=selected.ovr;foot.value=selected.foot;role.value=selected.role;photoData=selected.img||"";document.getElementById("editor").scrollIntoView({behavior:"smooth",block:"center"})}
+function changeFormation(){formation=document.getElementById("formation").value;players.slice(0,7).forEach(p=>{p.x=null;p.y=null});render()}
+function saveLocal(){localStorage.setItem("sevenSidePlayers",JSON.stringify(players))}
+function saveTeam(){saveLocal();showToast("บันทึก Team Sheet เรียบร้อย")}
+function resetTeam(){if(confirm("รีเซ็ตทีมกลับเป็นตัวอย่าง?")){players=defaultPlayers.map(x=>({...x}));saveLocal();render()}}
+function scrollToSection(id){document.getElementById(id).scrollIntoView({behavior:"smooth"})}
+function showToast(t){const x=document.getElementById("toast");x.textContent=t;x.style.display="block";clearTimeout(window.tt);window.tt=setTimeout(()=>x.style.display="none",1800)}
+render();
+</script>
+</body></html>
